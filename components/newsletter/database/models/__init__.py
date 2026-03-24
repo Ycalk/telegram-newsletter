@@ -8,6 +8,11 @@ from .newsletter import (
     NewsletterElementDAO,
     NewsletterElementDAOFactory,
 )
+from .newsletter_subscription import (
+    NewsletterSubscription,
+    NewsletterSubscriptionDAO,
+    NewsletterSubscriptionDAOFactory,
+)
 from .user import (
     TelegramUser,
     TelegramUserDAO,
@@ -34,4 +39,7 @@ __all__ = [
     "TelegramUser",
     "TelegramUserDAO",
     "TelegramUserDAOFactory",
+    "NewsletterSubscription",
+    "NewsletterSubscriptionDAO",
+    "NewsletterSubscriptionDAOFactory",
 ]

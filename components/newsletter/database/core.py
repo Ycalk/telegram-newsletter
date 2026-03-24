@@ -21,6 +21,8 @@ from .models import (
     NewsletterDAOFactory,
     NewsletterElementDAO,
     NewsletterElementDAOFactory,
+    NewsletterSubscriptionDAO,
+    NewsletterSubscriptionDAOFactory,
     TelegramUserDAO,
     TelegramUserDAOFactory,
     UserDAO,
@@ -36,6 +38,7 @@ def register_model() -> list[type]:
         Letter,
         Newsletter,
         NewsletterElement,
+        NewsletterSubscription,
         TelegramUser,
         User,
     )
@@ -46,6 +49,7 @@ def register_model() -> list[type]:
         NewsletterElement,
         TelegramUser,
         User,
+        NewsletterSubscription,
     ]
 
 
@@ -124,6 +128,7 @@ class DatabaseProvider(Provider):
         NewsletterElementDAO,
         TelegramUserDAO,
         UserDAO,
+        NewsletterSubscriptionDAO,
         scope=Scope.REQUEST,
     )
 
@@ -133,6 +138,7 @@ class DatabaseProvider(Provider):
         NewsletterElementDAOFactory,
         TelegramUserDAOFactory,
         UserDAOFactory,
+        NewsletterSubscriptionDAOFactory,
         scope=Scope.APP,
     )
 

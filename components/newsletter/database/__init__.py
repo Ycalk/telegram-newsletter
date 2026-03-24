@@ -10,6 +10,9 @@ from .models import (
     NewsletterElement,
     NewsletterElementDAO,
     NewsletterElementDAOFactory,
+    NewsletterSubscription,
+    NewsletterSubscriptionDAO,
+    NewsletterSubscriptionDAOFactory,
     TelegramUser,
     TelegramUserDAO,
     TelegramUserDAOFactory,
@@ -37,4 +40,7 @@ __all__ = [
     "User",
     "UserDAO",
     "UserDAOFactory",
+    "NewsletterSubscription",
+    "NewsletterSubscriptionDAO",
+    "NewsletterSubscriptionDAOFactory",
 ]

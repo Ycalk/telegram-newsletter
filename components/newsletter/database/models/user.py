@@ -13,6 +13,7 @@ from ._base import BaseDAO, BaseDAOFactory, BaseModel
 
 if TYPE_CHECKING:
     from .letter import Letter
+    from .newsletter_subscription import NewsletterSubscription
 
 
 class User(BaseModel):
@@ -32,6 +33,9 @@ class User(BaseModel):
         back_populates="user", passive_deletes=True
     )
     letters: Mapped[list[Letter]] = relationship(
+        back_populates="user", passive_deletes=True
+    )
+    subscriptions: Mapped[list[NewsletterSubscription]] = relationship(
         back_populates="user", passive_deletes=True
     )
 
