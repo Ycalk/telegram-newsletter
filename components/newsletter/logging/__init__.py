@@ -1,3 +1,8 @@
-from newsletter.logging import core
+from .core import setup_logging
+from .settings import LoggingSettings, LoggingSettingsProvider
 
-__all__ = ["core"]
+__all__ = [
+    "setup_logging",
+    "LoggingSettings",
+    "LoggingSettingsProvider",
+]
