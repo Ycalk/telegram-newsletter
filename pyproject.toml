@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "telegram-newsletter"
+version = "0.1.0"
+description = ""
+authors = ["ycalk <alosev752@gmail.com>"]
+packages = [
+    {include = "newsletter/admin_panel",from = "bases"},
+    {include = "newsletter/email_sender",from = "components"},
+    {include = "newsletter/database",from = "components"},
+    {include = "newsletter/logging",from = "components"},
+    {include = "newsletter/bot",from = "bases"},
+    {include = "newsletter/api_client",from = "components"},
+]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+pydantic-settings = "^2.13.1"
+fastapi = {extras = ["standard"], version = "^0.135.1"}
+dishka = {extras = ["fastapi"], version = "^1.9.1"}
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.45"}
+asyncpg = "^0.31.0"
+structlog = "^25.5.0"
+opentelemetry-api = "^1.40.0"
+opentelemetry-sdk = "^1.40.0"
+opentelemetry-exporter-otlp = "^1.40.0"
+opentelemetry-instrumentation-fastapi = "^0.61b0"
+opentelemetry-instrumentation-sqlalchemy = "^0.61b0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
