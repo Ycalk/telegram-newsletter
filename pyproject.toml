@@ -10,6 +10,7 @@ packages = [
     {include = "newsletter/logging",from = "components"},
     {include = "newsletter/bot",from = "bases"},
     {include = "newsletter/api_client",from = "components"},
+    {include = "newsletter/migrator",from = "bases"},
 ]
 
 [tool.poetry.dependencies]
@@ -26,6 +27,7 @@ opentelemetry-exporter-otlp = "^1.40.0"
 opentelemetry-instrumentation-fastapi = "^0.61b0"
 opentelemetry-instrumentation-sqlalchemy = "^0.61b0"
 alembic = "^1.18.4"
+httpx = "^0.28.1"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -33,3 +35,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 alembic = "newsletter.migrator:run"
+test_response = "development.test_response:run"
