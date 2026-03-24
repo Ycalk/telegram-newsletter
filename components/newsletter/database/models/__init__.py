@@ -1,15 +1,14 @@
-from .core import DatabaseProvider, register_model
-from .models import (
-    Letter,
-    LetterDAO,
-    LetterDAOFactory,
-    MultipleDAOFactory,
+from ._base import MultipleDAOFactory
+from .letter import Letter, LetterDAO, LetterDAOFactory
+from .newsletter import (
     Newsletter,
     NewsletterDAO,
     NewsletterDAOFactory,
     NewsletterElement,
     NewsletterElementDAO,
     NewsletterElementDAOFactory,
+)
+from .user import (
     TelegramUser,
     TelegramUserDAO,
     TelegramUserDAOFactory,
@@ -19,8 +18,6 @@ from .models import (
 )
 
 __all__ = [
-    "DatabaseProvider",
-    "register_model",
     "MultipleDAOFactory",
     "Letter",
     "LetterDAO",
@@ -31,10 +28,10 @@ __all__ = [
     "NewsletterElement",
     "NewsletterElementDAO",
     "NewsletterElementDAOFactory",
-    "TelegramUser",
-    "TelegramUserDAO",
-    "TelegramUserDAOFactory",
     "User",
     "UserDAO",
     "UserDAOFactory",
+    "TelegramUser",
+    "TelegramUserDAO",
+    "TelegramUserDAOFactory",
 ]
