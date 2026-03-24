@@ -1,3 +1,3 @@
-from newsletter.email_sender import core
+from .core import EmailSenderProvider, IEmailSender
 
-__all__ = ["core"]
+__all__ = ["EmailSenderProvider", "IEmailSender"]

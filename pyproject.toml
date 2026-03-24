@@ -28,6 +28,7 @@ opentelemetry-instrumentation-fastapi = "^0.61b0"
 opentelemetry-instrumentation-sqlalchemy = "^0.61b0"
 alembic = "^1.18.4"
 httpx = "^0.28.1"
+resend = "^2.26.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
