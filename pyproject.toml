@@ -11,13 +11,15 @@ packages = [
     {include = "newsletter/bot",from = "bases"},
     {include = "newsletter/api_client",from = "components"},
     {include = "newsletter/migrator",from = "bases"},
+    {include = "newsletter/channel_id_encryption",from = "components"},
+    {include = "newsletter/dto",from = "components"},
 ]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.14"
 pydantic-settings = "^2.13.1"
 fastapi = {extras = ["standard"], version = "^0.135.1"}
-dishka = {extras = ["fastapi"], version = "^1.9.1"}
+dishka = {extras = ["fastapi", "aiogram"], version = "^1.9.1"}
 sqlalchemy = {extras = ["asyncio"], version = "^2.0.45"}
 asyncpg = "^0.31.0"
 structlog = "^25.5.0"
@@ -30,6 +32,9 @@ alembic = "^1.18.4"
 httpx = "^0.28.1"
 resend = "^2.26.0"
 hashids = "^1.3.1"
+aiogram = "^3.26.0"
+email-validator = "^2.3.0"
+redis = "^7.4.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -38,3 +43,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.scripts]
 alembic = "newsletter.migrator:run"
 test_response = "development.test_response:run"
+encrypt_channel_id = "development.encrypt_channel_id:run"
+bot = "newsletter.bot:run"
