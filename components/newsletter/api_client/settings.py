@@ -15,3 +15,4 @@ class APIClientSettings(BaseSettings):
     api_base_url: str
     api_secret_token: str
     timeout_seconds: int = 5
+    cache_ttl_seconds: int = 3600

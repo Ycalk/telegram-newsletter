@@ -4,7 +4,17 @@ from typing import Protocol, Self, override
 
 import structlog
 from dishka import Provider, Scope, provide
-from httpx import AsyncClient, HTTPStatusError, Response, Timeout
+from hishel import CacheOptions, SpecificationPolicy
+from hishel.httpx import AsyncCacheClient
+from httpx import (
+    AsyncBaseTransport,
+    AsyncClient,
+    AsyncHTTPTransport,
+    HTTPStatusError,
+    Request,
+    Response,
+    Timeout,
+)
 from opentelemetry import trace
 from pydantic import BaseModel
 
@@ -124,6 +134,21 @@ class APIClient(IAPIClient):
             return result
 
 
+class ForceCacheTransport(AsyncBaseTransport):
+    def __init__(self, transport: AsyncBaseTransport, cache_ttl_seconds: int):
+        self.transport: AsyncBaseTransport = transport
+        self.cache_ttl_seconds: int = cache_ttl_seconds
+
+    @override
+    async def handle_async_request(self, request: Request) -> Response:
+        response = await self.transport.handle_async_request(request)
+        for header in ["cache-control", "expires", "pragma"]:
+            response.headers.pop(header, None)
+        response.headers["Cache-Control"] = f"public, max-age={self.cache_ttl_seconds}"
+
+        return response
+
+
 class APIClientProvider(Provider):
     @provide(scope=Scope.APP)
     def settings(self) -> APIClientSettings:
@@ -133,10 +158,20 @@ class APIClientProvider(Provider):
     async def httpx_client(
         self, settings: APIClientSettings
     ) -> AsyncIterable[AsyncClient]:
-        async with AsyncClient(
+        options = CacheOptions(
+            supported_methods=["GET"],
+            allow_stale=True,
+            shared=False,
+        )
+        async with AsyncCacheClient(
             base_url=settings.api_base_url,
             follow_redirects=True,
             timeout=Timeout(settings.timeout_seconds),
+            policy=SpecificationPolicy(cache_options=options),
+            transport=ForceCacheTransport(
+                transport=AsyncHTTPTransport(),
+                cache_ttl_seconds=settings.cache_ttl_seconds,
+            ),
         ) as client:
             yield client
 
