@@ -4,9 +4,9 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, String, func
+from sqlalchemy import ForeignKey, String, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload
 from sqlalchemy.types import TIMESTAMP
 
 from ._base import BaseDAO, BaseDAOFactory, BaseModel
@@ -93,6 +93,17 @@ class TelegramUserDAO(BaseDAO[TelegramUser, UUID]):
         )
         await self.save(obj)
         return obj
+
+    async def find_by_telegram_id_with_loaded_user(
+        self, telegram_id: int
+    ) -> TelegramUser | None:
+        stmt = (
+            select(TelegramUser)
+            .where(TelegramUser.telegram_id == telegram_id)
+            .options(selectinload(TelegramUser.user))
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
 
 
 class TelegramUserDAOFactory(BaseDAOFactory[TelegramUserDAO]):
