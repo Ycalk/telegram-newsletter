@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="h-screen w-full flex items-center justify-center">
+    <div
+        class="flex flex-col items-center justify-center h-full w-full p-8 text-center animate-fade-in bg-red-50 rounded-xl border border-red-100 shadow-sm">
+
+        <div class="bg-white p-3 rounded-full mb-4 shadow-sm border border-red-100">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-8 h-8 text-red-500">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+        </div>
+
+        <h3 class="text-lg font-bold text-gray-900 mb-2">
+            Что-то пошло не так
+        </h3>
+
+        <p class="text-gray-600 mb-6 max-w-sm">
+            {{ error }}
+        </p>
+
+        <div class="w-full max-w-sm bg-white border border-red-200 rounded p-3 mb-4 text-left overflow-hidden">
+            <p class="text-[10px] uppercase font-bold text-red-400 mb-1 tracking-wider">Детали ошибки</p>
+            <code class="text-xs text-red-700 font-mono break-words block">
+            {{ message }}
+        </code>
+        </div>
+        <a href="/"
+            class="mb-6 inline-flex items-center gap-2 px-5 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"
+                class="w-4 h-4 text-gray-500">
+                <path fill-rule="evenodd"
+                    d="M9.293 2.293a1 1 0 011.414 0l7 7A1 1 0 0117 11h-1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-3a1 1 0 00-1-1H9a1 1 0 00-1 1v3a1 1 0 01-1 1H5a1 1 0 01-1-1v-6H3a1 1 0 01-.707-1.707l7-7z"
+                    clip-rule="evenodd" />
+            </svg>
+            Вернуться на главную
+        </a>
+
+        <div class="flex flex-col items-center gap-1 mt-2">
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest">Trace ID</span>
+            <div
+                class="font-mono text-xs bg-gray-200 text-gray-600 px-3 py-1 rounded cursor-text select-all border border-gray-300">
+                {{ trace_id }}
+            </div>
+        </div>
+
+        {% if stack_trace %}
+        <div class="mt-2">
+            <span class="text-[10px] text-gray-400 uppercase tracking-widest">Stack Trace</span>
+            <div class="w-full max-w-sm text-left mb-4 group">
+                <div
+                    class="mt-2 p-3 bg-slate-800 rounded-md border border-slate-700 shadow-inner overflow-auto max-h-64">
+                    <pre
+                        class="text-[10px] text-green-400 font-mono leading-tight whitespace-pre-wrap">{{ stack_trace }}</pre>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
