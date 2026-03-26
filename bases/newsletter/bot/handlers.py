@@ -16,7 +16,7 @@ from aiogram.types import (
 from dishka import FromDishka
 from email_validator import validate_email
 from jinja2 import Environment
-from newsletter.api_client import GetChannel, GetMedia, IAPIClient
+from newsletter.api_client import GetChannel, IAPIClient
 from newsletter.channel_id_encryption import IChannelIdEncryption
 from newsletter.database import (
     NewsletterSubscriptionDAO,
@@ -140,7 +140,7 @@ async def start_command(
         )
 
         if channel.logo is not None:
-            image_url = (await api_client(GetMedia(media_id=channel.logo.id))).url
+            image_url = api_client.get_media_url(channel.logo.file_name)
             await message.answer_photo(
                 photo=image_url,
                 caption=text,
