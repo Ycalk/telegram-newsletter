@@ -10,7 +10,9 @@ class GetChannelMessages(BaseMethod[RootModel[list[ChannelMessage]]]):
     channel_id: Annotated[int, ParamLocation.QUERY]
     sorting: Annotated[Literal["newest", "oldest"], ParamLocation.QUERY] = "newest"
     skip: Annotated[int, ParamLocation.QUERY] = 0
-    limit: Annotated[int | None, ParamLocation.QUERY] = None
+    limit: Annotated[int | None, ParamLocation.QUERY] = 1000
+    created_at_start: Annotated[int | None, ParamLocation.QUERY] = None
+    created_at_end: Annotated[int | None, ParamLocation.QUERY] = None
 
     endpoint: ClassVar[str] = "/api/public/channel/messages"
     method: ClassVar[str] = "GET"

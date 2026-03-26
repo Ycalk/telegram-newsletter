@@ -1,6 +1,7 @@
 from .core import APIClientProvider, APIException, IAPIClient
 from .methods import (
     AddChannel,
+    GetAllChannels,
     GetChannel,
     GetChannelIds,
     GetChannelMessages,
@@ -14,6 +15,7 @@ __all__ = [
     "IAPIClient",
     "APIClientProvider",
     "AddChannel",
+    "GetAllChannels",
     "GetChannel",
     "GetChannelIds",
     "GetChannelMessages",

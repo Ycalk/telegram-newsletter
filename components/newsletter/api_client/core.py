@@ -24,6 +24,7 @@ from .settings import APIClientSettings
 
 class IAPIClient(Protocol):
     async def __call__[T: BaseModel](self, method: BaseMethod[T]) -> T: ...
+    def get_media_url(self, file_name: str, preview: bool = False) -> str: ...
 
 
 class _ErrorResponse(BaseModel):
@@ -64,11 +65,20 @@ class APIException(Exception):
 
 
 class APIClient(IAPIClient):
-    def __init__(self, httpx_client: AsyncClient, api_secret_token: str) -> None:
+    def __init__(
+        self, httpx_client: AsyncClient, api_secret_token: str, s3_base_url: str
+    ) -> None:
         self.httpx_client: AsyncClient = httpx_client
         self.secret_token: str = api_secret_token
         self.tracer: trace.Tracer = trace.get_tracer("api_client")
         self.logger: structlog.BoundLogger = structlog.get_logger("api_client")
+        self.s3_base_url: str = s3_base_url
+
+    @override
+    def get_media_url(self, file_name: str, preview: bool = False) -> str:
+        if preview:
+            return f"{self.s3_base_url}/previews/{file_name}"
+        return f"{self.s3_base_url}/{file_name}"
 
     @override
     async def __call__[T: BaseModel](self, method: BaseMethod[T]) -> T:
@@ -179,4 +189,4 @@ class APIClientProvider(Provider):
     def api_client(
         self, httpx_client: AsyncClient, settings: APIClientSettings
     ) -> IAPIClient:
-        return APIClient(httpx_client, settings.api_secret_token)
+        return APIClient(httpx_client, settings.api_secret_token, settings.s3_base_url)
