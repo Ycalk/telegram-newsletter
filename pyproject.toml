@@ -36,6 +36,7 @@ aiogram = "^3.26.0"
 email-validator = "^2.3.0"
 redis = "^7.4.0"
 hishel = {extras = ["httpx"], version = "^1.1.9"}
+sendgrid = "^6.12.5"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
@@ -46,3 +47,4 @@ alembic = "newsletter.migrator:run"
 test_response = "development.test_response:run"
 encrypt_channel_id = "development.encrypt_channel_id:run"
 bot = "newsletter.bot:run"
+admin_panel = "newsletter.admin_panel:run"
