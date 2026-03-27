@@ -13,6 +13,7 @@ packages = [
     {include = "newsletter/migrator",from = "bases"},
     {include = "newsletter/channel_id_encryption",from = "components"},
     {include = "newsletter/dto",from = "components"},
+    {include = "newsletter/media_proxy",from = "bases"},
 ]
 
 [tool.poetry.dependencies]
