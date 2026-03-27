@@ -18,3 +18,4 @@ class MediaProxySettings(BaseSettings):
     play_icon_size_percent: int = 20
 
     port: int = 8000
+    cache_ttl_seconds: int = 86400
