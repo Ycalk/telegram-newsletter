@@ -1,0 +1,113 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  prepare_deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: "2.3.1"
+
+      - name: Instal Poetry plugins
+        run: |
+          poetry self add poetry-multiproject-plugin
+          poetry self add poetry-polylith-plugin
+          poetry self add poetry-plugin-export
+          poetry install
+
+      - name: Create admin panel project wheel
+        working-directory: projects/admin_panel
+        run: |
+          poetry install
+          poetry build-project
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+      
+      - name: Create bot project wheel
+        working-directory: projects/bot
+        run: |
+          poetry install
+          poetry build-project
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+      
+      - name: Create media proxy project wheel
+        working-directory: projects/media_proxy
+        run: |
+          poetry install
+          poetry build-project
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+      - name: Create migrator project wheel
+        working-directory: projects/migrator
+        run: |
+          poetry install
+          poetry build-project
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+      - name: Archive code for deploy
+        run: |
+          zip -r deploy.zip docker-compose.yaml projects/ jaeger/
+
+      - name: Create .env file
+        run: |
+          echo "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${{ secrets.OPENSEARCH_INITIAL_ADMIN_PASSWORD }}" >> .env
+          echo "CHANNEL_ID_ENCRYPTION_KEY=${{ secrets.CHANNEL_ID_ENCRYPTION_KEY }}" >> .env
+
+          echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
+          echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+          echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+
+          echo "API_BASE_URL=${{ vars.API_BASE_URL }}" >> .env
+          echo "S3_BASE_URL=${{ vars.S3_BASE_URL}}" >> .env
+          echo "INTERNAL_S3_BASE_URL=${{ vars.INTERNAL_S3_BASE_URL}}" >> .env
+          echo "API_SECRET_TOKEN=${{ secrets.API_SECRET_TOKEN}}" >> .env
+
+          echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
+          echo "BOT_USERNAME=${{ vars.BOT_USERNAME }}" >> .env
+
+          echo "SEND_FROM_EMAIL=${{ vars.SEND_FROM_EMAIL }}" >> .env
+          echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
+
+      - name: Transfer files to server
+        uses: appleboy/scp-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          source: "deploy.zip,.env"
+          target: "/home/${{ secrets.SERVER_USER }}/Newsletter/"
+
+  deploy_container:
+    runs-on: ubuntu-latest
+    environment: staging
+    needs: prepare_deploy
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          script: |
+            cd /home/${{ secrets.SERVER_USER }}/Newsletter/
+            unzip -o deploy.zip
+            sudo docker compose build
+            sudo docker compose up -d
+            sudo docker image prune -f
+            rm /home/${{ secrets.SERVER_USER }}/Newsletter/deploy.zip
