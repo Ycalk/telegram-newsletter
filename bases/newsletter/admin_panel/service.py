@@ -50,8 +50,8 @@ class AdminPanelService(IAdminPanelService):
         self.api_client: IAPIClient = api_client
         self.email_sender: IEmailSender = email_sender
         self.subscription_dao: NewsletterSubscriptionDAO = subscription_dao
-        self.logger: structlog.BoundLogger = structlog.get_logger("admin_panel_service")
-        self.tracer: trace.Tracer = trace.get_tracer("admin_panel_service")
+        self.logger: structlog.BoundLogger = structlog.get_logger("admin_panel.service")
+        self.tracer: trace.Tracer = trace.get_tracer("admin_panel.service")
 
     @override
     async def get_channels(self) -> list[AdminChannelDTO]:
