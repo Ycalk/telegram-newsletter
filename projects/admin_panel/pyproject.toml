@@ -36,3 +36,6 @@ hishel = {extras = ["httpx"], version = "^1.1.9"}
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+run_project = "newsletter.admin_panel:run"

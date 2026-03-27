@@ -1,0 +1,184 @@
+x-depends_on: &additional_services_healthy
+  postgres:
+    condition: service_healthy
+  redis:
+    condition: service_healthy
+  jaeger:
+    condition: service_started
+
+services:
+  # Additional
+  postgres:
+    image: postgres:17.9-bookworm
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+  
+  redis:
+    image: redis:8.6.2-alpine
+    restart: always
+    volumes:
+      - redis-data:/data
+    command: >
+      redis-server
+      --save 60 1
+      --save 300 10
+      --appendonly yes
+      --appendfsync everysec
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  adminer:
+    image: adminer:5.4.1
+    environment:
+      - ADMINER_DEFAULT_SERVER=postgres
+      - ADMINER_DEFAULT_SYSTEM=postgres
+    ports:
+      - "127.0.0.1:5332:8080"
+
+  opensearch:
+    image: opensearchproject/opensearch:3.4.0
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - opensearch-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  jaeger:
+    image: cr.jaegertracing.io/jaegertracing/jaeger:2.14.1
+    restart: always
+    ports:
+      - "127.0.0.1:16586:16686"
+    volumes:
+      - "./jaeger/jaeger-ui.json:/etc/jaeger/jaeger-ui.json"
+      - "./jaeger/config.yml:/etc/jaeger/config.yml"
+    command: ["--config", "/etc/jaeger/config.yml"]
+    environment:
+      - SPANMETRICS_FLUSH_INTERVAL=10s
+    depends_on:
+      opensearch:
+        condition: service_healthy
+
+  # Services
+  migrator:
+    build:
+      context: projects/migrator
+      dockerfile: Dockerfile
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+
+      - TRACE_EXPORTER_ENDPOINT=http://jaeger:4318/v1/traces
+    depends_on:
+      <<: *additional_services_healthy
+
+  admin_panel:
+    build:
+      context: projects/admin_panel
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "127.0.0.1:4900:8000"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+
+      - BOT_USERNAME=${BOT_USERNAME}
+      
+      - CHANNEL_ID_ENCRYPTION_KEY=${CHANNEL_ID_ENCRYPTION_KEY}
+
+      - SEND_FROM_EMAIL=${SEND_FROM_EMAIL}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      
+      - API_BASE_URL=${API_BASE_URL}
+      - S3_BASE_URL=${INTERNAL_S3_BASE_URL}
+      - API_SECRET_TOKEN=${API_SECRET_TOKEN}
+
+      - TRACE_EXPORTER_ENDPOINT=http://jaeger:4318/v1/traces
+    depends_on:
+      <<: *additional_services_healthy
+      migrator:
+        condition: service_started
+  
+  bot:
+    build:
+      context: projects/bot
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+
+      - BOT_TOKEN=${BOT_TOKEN}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      - CHANNEL_ID_ENCRYPTION_KEY=${CHANNEL_ID_ENCRYPTION_KEY}
+
+      - SEND_FROM_EMAIL=${SEND_FROM_EMAIL}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      
+      - API_BASE_URL=${API_BASE_URL}
+      - S3_BASE_URL=${INTERNAL_S3_BASE_URL}
+      - API_SECRET_TOKEN=${API_SECRET_TOKEN}
+
+      - TRACE_EXPORTER_ENDPOINT=http://jaeger:4318/v1/traces
+    depends_on:
+      <<: *additional_services_healthy
+      migrator:
+        condition: service_started
+
+  media_proxy:
+    build:
+      context: projects/media_proxy
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "127.0.0.1:4800:8000"
+    environment:
+      - API_BASE_URL=${API_BASE_URL}
+      - S3_BASE_URL=${S3_BASE_URL}
+      - API_SECRET_TOKEN=${API_SECRET_TOKEN}
+
+      - TRACE_EXPORTER_ENDPOINT=http://jaeger:4318/v1/traces
+    depends_on:
+      <<: *additional_services_healthy
+      migrator:
+        condition: service_started
+
+volumes:
+  postgres-data:
+  redis-data:
+  opensearch-data:
