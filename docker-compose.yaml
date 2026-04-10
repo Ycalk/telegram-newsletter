@@ -177,6 +177,26 @@ services:
       <<: *additional_services_healthy
       migrator:
         condition: service_started
+  
+  view_tracker:
+    build:
+      context: projects/view_tracker
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "127.0.0.1:4700:8000"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+
+      - TRACE_EXPORTER_ENDPOINT=http://jaeger:4318/v1/traces
+    depends_on:
+      <<: *additional_services_healthy
+      migrator:
+        condition: service_started
 
 volumes:
   postgres-data:

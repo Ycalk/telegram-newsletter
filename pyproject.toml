@@ -14,6 +14,7 @@ packages = [
     {include = "newsletter/channel_id_encryption",from = "components"},
     {include = "newsletter/dto",from = "components"},
     {include = "newsletter/media_proxy",from = "bases"},
+    {include = "newsletter/view_tracker",from = "bases"},
 ]
 
 [tool.poetry.dependencies]
@@ -51,3 +52,4 @@ encrypt_channel_id = "development.encrypt_channel_id:run"
 bot = "newsletter.bot:run"
 admin_panel = "newsletter.admin_panel:run"
 media_proxy = "newsletter.media_proxy:run"
+view_tracker = "newsletter.view_tracker:run"
