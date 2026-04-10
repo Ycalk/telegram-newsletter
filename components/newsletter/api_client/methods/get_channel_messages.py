@@ -13,6 +13,7 @@ class GetChannelMessages(BaseMethod[RootModel[list[ChannelMessage]]]):
     limit: Annotated[int | None, ParamLocation.QUERY] = 1000
     created_at_start: Annotated[int | None, ParamLocation.QUERY] = None
     created_at_end: Annotated[int | None, ParamLocation.QUERY] = None
+    with_html_text: Annotated[Literal[True], ParamLocation.QUERY] = True
 
     endpoint: ClassVar[str] = "/api/public/channel/messages"
     method: ClassVar[str] = "GET"

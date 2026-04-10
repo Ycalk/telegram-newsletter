@@ -1,9 +1,11 @@
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
 from fastapi import APIRouter, Form, Request, Response
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from newsletter.api_client import GetChannel, GetChannelMessages, IAPIClient
 from newsletter.channel_id_encryption import IChannelIdEncryption
 from newsletter.email_sender import IEmailSender
 
@@ -79,10 +81,21 @@ async def preview_newsletter(
     request: Request,
     templates: FromDishka[Jinja2Templates],
     email_sender: FromDishka[IEmailSender],
+    api_client: FromDishka[IAPIClient],
     channel_id: int,
     hours_ago: Annotated[int, Form()],
 ) -> HTMLResponse:
-    email_html = await email_sender.generate_html_content(channel_id, hours_ago)
+    channel = await api_client(GetChannel(channel_id=channel_id))
+    now = datetime.now(timezone.utc)
+    from_date = now - timedelta(hours=hours_ago)
+    messages = await api_client(
+        GetChannelMessages(
+            channel_id=channel_id,
+            created_at_start=int(from_date.timestamp()),
+            created_at_end=int(now.timestamp()),
+        )
+    )
+    email_html = email_sender.generate_html_content(channel, messages.root, None)
     return templates.TemplateResponse(
         request=request,
         name="partials/preview_wrapper.html",

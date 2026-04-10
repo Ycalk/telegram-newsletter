@@ -1,4 +1,4 @@
-from typing import Annotated, ClassVar, override
+from typing import Annotated, ClassVar, Literal, override
 from uuid import UUID
 
 from newsletter.dto import ChannelMessage
@@ -8,6 +8,7 @@ from ._base import BaseMethod, ParamLocation
 
 class GetMessage(BaseMethod[ChannelMessage]):
     message_id: Annotated[UUID, ParamLocation.QUERY]
+    with_html_text: Annotated[Literal[True], ParamLocation.QUERY] = True
 
     endpoint: ClassVar[str] = "/api/public/message"
     method: ClassVar[str] = "GET"

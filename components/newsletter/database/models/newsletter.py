@@ -39,13 +39,11 @@ class NewsletterDAO(BaseDAO[Newsletter, UUID]):
     async def create(
         self,
         channel_id: int,
-        channel_messages_count: int,
         messages_from: datetime,
         messages_to: datetime,
     ) -> Newsletter:
         obj = Newsletter(
             channel_id=channel_id,
-            channel_messages_count=channel_messages_count,
             messages_from=messages_from,
             messages_to=messages_to,
         )
@@ -65,7 +63,7 @@ class NewsletterElement(BaseModel):
     newsletter_id: Mapped[UUID] = mapped_column(
         ForeignKey("newsletter.id", ondelete="CASCADE"), index=True
     )
-    message_id: Mapped[int] = mapped_column(BigInteger)
+    message_id: Mapped[UUID] = mapped_column()
 
     newsletter: Mapped[Newsletter] = relationship(back_populates="elements")
 
@@ -77,7 +75,7 @@ class NewsletterElementDAO(BaseDAO[NewsletterElement, UUID]):
     async def create(
         self,
         newsletter_id: UUID,
-        message_id: int,
+        message_id: UUID,
     ) -> NewsletterElement:
         obj = NewsletterElement(
             newsletter_id=newsletter_id,

@@ -64,6 +64,7 @@ class ChannelMessage(BaseModel):
     channel_message_id: int
     created_at: int
     text: str
+    html_text: str
     media: list[Media]
     statistics: list[ChannelMessageStatistic]
     recorded_at: int

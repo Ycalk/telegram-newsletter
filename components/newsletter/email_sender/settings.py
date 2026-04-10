@@ -14,3 +14,4 @@ class EmailSenderSettings(BaseSettings):
 
     send_from_email: str
     resend_api_key: str
+    track_url: str

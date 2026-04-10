@@ -123,15 +123,17 @@
     </style>
 </head>
 
-<body style="margin:0; padding:0; background-color:#EDE7DB; font-family:Arial, Helvetica, sans-serif;" class="email-bg">
+<body style="margin:0; padding:0; background-color:#EBE8E3; font-family:Arial, Helvetica, sans-serif;" class="email-bg">
 
     <div style="display:none; max-height:0; overflow:hidden; mso-hide:all;">
         Новые сообщения из канала {{ channel_name }}&#8199;&#65279;&#847; &#8199;&#65279;&#847; &#8199;&#65279;&#847;
     </div>
+
     {% if tracking_url %}
     <img src="{{ tracking_url }}" width="1" height="1" alt="" style="display:none; visibility:hidden; mso-hide:all;" />
     {% endif %}
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#EDE7DB;"
+
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#EBE8E3;"
         class="email-bg">
         <tr>
             <td align="center" style="padding:24px 8px;">
@@ -163,7 +165,7 @@
                     </tr>
 
                     <tr>
-                        <td style="background-color:#F5F0E8; padding:20px 28px 18px;"
+                        <td style="background-color:#F5F2EF; padding:20px 28px 18px;"
                             class="mobile-padding border-light">
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                                 <tr>
@@ -190,13 +192,13 @@
                     </tr>
 
                     <tr>
-                        <td style="padding:0 28px; background-color:#F5F0E8;" class="mobile-padding border-light">
+                        <td style="padding:0 28px; background-color:#F5F2EF;" class="mobile-padding border-light">
                             <div style="height:1px; background-color:#D9D0C3;" class="border-light"></div>
                         </td>
                     </tr>
 
                     <tr>
-                        <td style="background-color:#FAFAF6; padding:32px 0 16px;" class="body-bg">
+                        <td style="background-color:#F7F7F7; padding:32px 0 16px;" class="body-bg">
 
                             {% for msg in messages %}
                             <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%"
@@ -241,7 +243,7 @@
                                                 <td align="right" valign="bottom">
                                                     {% if msg.url %}
                                                     <a href="{{ msg.url }}" target="_blank" class="link-original"
-                                                        style="font-family:'Courier New',Courier,monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#2B4C3F; text-decoration:none; border-bottom:1px dashed #2B4C3F; padding-bottom:2px;">
+                                                        style="font-family:'Courier New',Courier,monospace; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:#222222; text-decoration:none; border-bottom:1px dashed #222222; padding-bottom:2px;">
                                                         Оригинал →
                                                     </a>
                                                     {% endif %}
@@ -269,7 +271,7 @@
                     </tr>
 
                     <tr>
-                        <td style="background-color:#FAFAF6; padding:0 28px;" class="mobile-padding body-bg">
+                        <td style="background-color:#F7F7F7; padding:0 28px;" class="mobile-padding body-bg">
                             <div style="border-top:2px solid #1A1714; padding-top:5px;" class="border-light">
                                 <div style="border-top:1px solid #D9D0C3;" class="border-light"></div>
                             </div>

@@ -1,13 +1,16 @@
 import asyncio
-from datetime import datetime, timedelta, timezone
+import re
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import NewType, Protocol, override
+from uuid import UUID
 from zoneinfo import ZoneInfo
 
 import resend
 from dishka import Provider, Scope, provide
 from jinja2 import Environment, FileSystemLoader
-from newsletter.api_client import GetChannel, GetChannelMessages, IAPIClient
+from newsletter.api_client import IAPIClient
+from newsletter.dto import Channel, ChannelMessage
 
 from .settings import EmailSenderSettings
 
@@ -19,18 +22,23 @@ class IEmailSender(Protocol):
         self, to_emails: list[str], subject: str, html_content: str
     ) -> None: ...
 
-    async def generate_html_content(
-        self, channel_id: int, posts_hour_ago: int
+    def generate_html_content(
+        self, channel: Channel, messages: list[ChannelMessage], letter_id: UUID | None
     ) -> str: ...
 
 
 class EmailSender(IEmailSender):
     def __init__(
-        self, send_from_email: str, env: _EmailSenderEnv, api_client: IAPIClient
+        self,
+        send_from_email: str,
+        env: _EmailSenderEnv,
+        api_client: IAPIClient,
+        track_url: str,
     ) -> None:
         self.send_from_email: str = send_from_email
         self.env: Environment = env
         self.api_client: IAPIClient = api_client
+        self.track_url: str = track_url
 
     @override
     async def __call__(
@@ -65,27 +73,21 @@ class EmailSender(IEmailSender):
         return f"{msk_dt.day} {month_str} {msk_dt.strftime('%H:%M')} (МСК)"
 
     @override
-    async def generate_html_content(self, channel_id: int, posts_hour_ago: int) -> str:
-        template = self.env.get_template("newsletter.html")
-        channel = await self.api_client(GetChannel(channel_id=channel_id))
-        now = datetime.now(timezone.utc)
-        from_date = now - timedelta(hours=posts_hour_ago)
-        messages = await self.api_client(
-            GetChannelMessages(
-                channel_id=channel_id,
-                created_at_start=int(from_date.timestamp()),
-                created_at_end=int(now.timestamp()),
-            )
-        )
-
+    def generate_html_content(
+        self, channel: Channel, messages: list[ChannelMessage], letter_id: UUID | None
+    ) -> str:
+        template = self.env.get_template("newsletter-new-color.html")
         return template.render(
             channel_name=channel.name,
             channel_avatar=self.api_client.get_media_url(channel.logo.file_name)
             if channel.logo
             else None,
+            tracking_url=f"{self.track_url}/{letter_id}" if letter_id else None,
             messages=[
                 {
-                    "text": msg.text,
+                    "text": re.sub(
+                        r"<tg-emoji[^>]*>(.*?)</tg-emoji>", r"\1", msg.html_text
+                    ).replace("\n", "<br>"),
                     "media": [
                         {
                             "url": self.api_client.get_media_url(media.file_name),
@@ -103,7 +105,7 @@ class EmailSender(IEmailSender):
                         datetime.fromtimestamp(msg.created_at, tz=timezone.utc)
                     ),
                 }
-                for msg in messages.root
+                for msg in messages
             ],
         )
 
@@ -129,4 +131,6 @@ class EmailSenderProvider(Provider):
         api_client: IAPIClient,
     ) -> IEmailSender:
         resend.api_key = settings.resend_api_key
-        return EmailSender(settings.send_from_email, env, api_client)
+        return EmailSender(
+            settings.send_from_email, env, api_client, settings.track_url
+        )
