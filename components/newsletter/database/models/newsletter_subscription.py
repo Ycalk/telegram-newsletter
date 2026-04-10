@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Any
 from uuid import UUID, uuid4
 
 from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload
-from sqlalchemy.types import TIMESTAMP
 
 from ._base import BaseDAO, BaseDAOFactory, BaseModel
 from .user import User
@@ -24,13 +22,6 @@ class NewsletterSubscription(BaseModel):
         ForeignKey("user.id", ondelete="CASCADE"), index=True
     )
     channel_id: Mapped[int] = mapped_column(BigInteger, index=True)
-
-    created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now()
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
 
     user: Mapped[User] = relationship(back_populates="subscriptions")
 

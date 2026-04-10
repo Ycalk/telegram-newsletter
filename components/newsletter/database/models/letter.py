@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import ForeignKey, UniqueConstraint, func
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import TIMESTAMP
@@ -29,10 +29,7 @@ class Letter(BaseModel):
     user_id: Mapped[UUID] = mapped_column(
         ForeignKey("user.id", ondelete="CASCADE"), index=True
     )
-
-    created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now()
-    )
+    viewed_at: Mapped[datetime | None] = mapped_column(TIMESTAMP(timezone=True))
 
     newsletter: Mapped[Newsletter] = relationship(back_populates="letters")
     user: Mapped[User] = relationship(back_populates="letters")

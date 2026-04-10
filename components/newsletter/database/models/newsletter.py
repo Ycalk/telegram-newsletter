@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import BigInteger, ForeignKey, func
+from sqlalchemy import BigInteger, ForeignKey
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import TIMESTAMP
@@ -20,17 +20,9 @@ class Newsletter(BaseModel):
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     channel_id: Mapped[int] = mapped_column(BigInteger, index=True)
-    channel_messages_count: Mapped[int] = mapped_column()
 
     messages_from: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True))
     messages_to: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True))
-
-    created_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now()
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
-    )
 
     letters: Mapped[list[Letter]] = relationship(
         back_populates="newsletter", passive_deletes=True

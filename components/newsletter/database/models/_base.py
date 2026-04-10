@@ -1,15 +1,22 @@
 from abc import ABC
 from collections.abc import AsyncIterator, Callable, Sequence
 from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Any, TypeVar
 
-from sqlalchemy import select
+from sqlalchemy import TIMESTAMP, func, select
 from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class BaseModel(AsyncAttrs, DeclarativeBase):
-    pass
+    __abstract__: bool = True
+    created_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now()
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
 
 class BaseDAO[Model: BaseModel, Id](ABC):
