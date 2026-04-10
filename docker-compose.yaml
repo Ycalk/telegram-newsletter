@@ -118,6 +118,7 @@ services:
 
       - SEND_FROM_EMAIL=${SEND_FROM_EMAIL}
       - RESEND_API_KEY=${RESEND_API_KEY}
+      - TRACK_URL=${TRACK_URL}
       
       - API_BASE_URL=${API_BASE_URL}
       - S3_BASE_URL=${INTERNAL_S3_BASE_URL}
@@ -149,6 +150,7 @@ services:
 
       - SEND_FROM_EMAIL=${SEND_FROM_EMAIL}
       - RESEND_API_KEY=${RESEND_API_KEY}
+      - TRACK_URL=${TRACK_URL}
       
       - API_BASE_URL=${API_BASE_URL}
       - S3_BASE_URL=${INTERNAL_S3_BASE_URL}

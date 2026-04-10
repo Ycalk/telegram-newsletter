@@ -7,6 +7,7 @@ from .newsletter import (
     NewsletterElement,
     NewsletterElementDAO,
     NewsletterElementDAOFactory,
+    NewsletterStatsDTO,
 )
 from .newsletter_subscription import (
     NewsletterSubscription,
@@ -33,6 +34,7 @@ __all__ = [
     "NewsletterElement",
     "NewsletterElementDAO",
     "NewsletterElementDAOFactory",
+    "NewsletterStatsDTO",
     "User",
     "UserDAO",
     "UserDAOFactory",

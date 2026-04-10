@@ -82,6 +82,7 @@ jobs:
           echo "S3_BASE_URL=${{ vars.S3_BASE_URL}}" >> .env
           echo "INTERNAL_S3_BASE_URL=${{ vars.INTERNAL_S3_BASE_URL}}" >> .env
           echo "API_SECRET_TOKEN=${{ secrets.API_SECRET_TOKEN}}" >> .env
+          echo "TRACK_URL=${{ vars.TRACK_URL}}" >> .env
 
           echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
           echo "BOT_USERNAME=${{ vars.BOT_USERNAME }}" >> .env

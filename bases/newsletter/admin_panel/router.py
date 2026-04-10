@@ -7,6 +7,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from newsletter.api_client import GetChannel, GetChannelMessages, IAPIClient
 from newsletter.channel_id_encryption import IChannelIdEncryption
+from newsletter.database import NewsletterDAO
 from newsletter.email_sender import IEmailSender
 
 from .service import IAdminPanelService
@@ -42,10 +43,12 @@ async def get_channel_details(
     service: FromDishka[IAdminPanelService],
     encryption: FromDishka[IChannelIdEncryption],
     settings: FromDishka[AdminPanelSettings],
+    newsletter_dao: FromDishka[NewsletterDAO],
     channel_id: int,
 ) -> Response:
     channel = await service.get_channel(channel_id)
     subscribers = await service.get_channel_subscribers(channel_id)
+    channel_stats = await newsletter_dao.get_channel_statistics(channel_id)
 
     encrypted_id = encryption.encrypt(channel_id)
     invite_link = f"https://t.me/{settings.bot_username}?start={encrypted_id}"
@@ -57,6 +60,7 @@ async def get_channel_details(
             "channel": channel,
             "subscribers": subscribers,
             "invite_link": invite_link,
+            "newsletters_stats": channel_stats,
         },
     )
 
