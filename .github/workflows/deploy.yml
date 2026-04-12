@@ -89,6 +89,7 @@ jobs:
 
           echo "SEND_FROM_EMAIL=${{ vars.SEND_FROM_EMAIL }}" >> .env
           echo "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" >> .env
+          echo "SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}" >> .env
 
       - name: Transfer files to server
         uses: appleboy/scp-action@v1

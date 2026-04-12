@@ -11,6 +11,8 @@ from dishka import Provider, Scope, provide
 from jinja2 import Environment, FileSystemLoader
 from newsletter.api_client import IAPIClient
 from newsletter.dto import Channel, ChannelMessage
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 
 from .settings import EmailSenderSettings
 
@@ -34,23 +36,34 @@ class EmailSender(IEmailSender):
         env: _EmailSenderEnv,
         api_client: IAPIClient,
         track_url: str,
+        sendgrid_client: SendGridAPIClient | None,
     ) -> None:
         self.send_from_email: str = send_from_email
         self.env: Environment = env
         self.api_client: IAPIClient = api_client
         self.track_url: str = track_url
+        self.sendgrid_client: SendGridAPIClient | None = sendgrid_client
 
     @override
     async def __call__(
         self, to_emails: list[str], subject: str, html_content: str
     ) -> None:
-        message: resend.Emails.SendParams = {
-            "from": self.send_from_email,
-            "to": to_emails,
-            "subject": subject,
-            "html": html_content,
-        }
-        await asyncio.to_thread(resend.Emails.send, message)
+        if self.sendgrid_client is None:
+            message: resend.Emails.SendParams = {
+                "from": self.send_from_email,
+                "to": to_emails,
+                "subject": subject,
+                "html": html_content,
+            }
+            await asyncio.to_thread(resend.Emails.send, message)
+        else:
+            mail = Mail(
+                from_email=self.send_from_email,
+                to_emails=to_emails,
+                subject=subject,
+                html_content=html_content,
+            )
+            await asyncio.to_thread(self.sendgrid_client.send, mail)
 
     def _format_ru_date(self, dt: datetime) -> str:
         msk_tz = ZoneInfo("Europe/Moscow")
@@ -130,7 +143,15 @@ class EmailSenderProvider(Provider):
         env: _EmailSenderEnv,
         api_client: IAPIClient,
     ) -> IEmailSender:
-        resend.api_key = settings.resend_api_key
+        sendgrid_client: SendGridAPIClient | None = None
+        if settings.resend_api_key is not None:
+            resend.api_key = settings.resend_api_key
+        else:
+            sendgrid_client = SendGridAPIClient(settings.sendgrid_api_key)
         return EmailSender(
-            settings.send_from_email, env, api_client, settings.track_url
+            settings.send_from_email,
+            env,
+            api_client,
+            settings.track_url,
+            sendgrid_client,
         )
