@@ -12,6 +12,7 @@ from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     Message,
+    URLInputFile,
 )
 from dishka import FromDishka
 from email_validator import validate_email
@@ -141,8 +142,10 @@ async def start_command(
 
         if channel.logo is not None:
             image_url = api_client.get_media_url(channel.logo.file_name)
+            request_logger.info("got_logo_url", channel_logo=image_url)
+            span.set_attribute("channel_logo", image_url)
             await message.answer_photo(
-                photo=image_url,
+                photo=URLInputFile(image_url),
                 caption=text,
                 reply_markup=keyboard,
             )
