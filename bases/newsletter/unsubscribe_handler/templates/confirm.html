@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>Отписка от рассылки | телеграФЪ</title>
+    <style>
+        :root {
+            --bg-outer: #EDE7DB;
+            --bg-inner: #FAFAF6;
+            --bg-header: #F5F0E8;
+            --bg-dark: #1A1714;
+            --text-primary: #1A1714;
+            --text-secondary: #3A3632;
+            --text-light: #F5F0E8;
+            --text-muted: #D9D0C3;
+            --accent-gold: #B8943E;
+            --accent-brown: #8B7355;
+            --border-light: #D9D0C3;
+            --btn-hover: #302b26;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-outer: #12100E;
+                --bg-inner: #252220;
+                --bg-header: #1A1714;
+                --text-primary: #F5F0E8;
+                --text-secondary: #D9D0C3;
+                --border-light: #3A3632;
+                --btn-hover: #2a2522;
+            }
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-outer);
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .wrapper {
+            padding: 24px 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--bg-inner);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .header-dark {
+            background-color: var(--bg-dark);
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(139, 115, 85, 0.3);
+        }
+
+        .logo {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 0.03em;
+        }
+
+        .meta-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 9px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--accent-brown);
+        }
+
+        .header-light {
+            background-color: var(--bg-header);
+            padding: 20px 28px 18px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        h1 {
+            font-family: Georgia, 'Times New Roman', serif;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .content {
+            padding: 40px 28px;
+            text-align: center;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin: 0 0 24px 0;
+        }
+
+        .btn-primary {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px 32px;
+            border: 1px solid var(--accent-gold);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .cancel-link {
+            display: block;
+            margin-top: 16px;
+            color: var(--accent-brown);
+            font-size: 14px;
+            text-decoration: underline;
+        }
+
+        .footer-divider {
+            border-top: 2px solid var(--text-primary);
+            padding-top: 5px;
+            margin: 0 28px;
+        }
+        .footer-divider-inner {
+            border-top: 1px solid var(--border-light);
+        }
+
+        .footer-dark {
+            background-color: var(--bg-dark);
+            padding: 28px 28px 20px;
+            margin-top: 16px;
+        }
+
+        .footer-text {
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-muted);
+            margin: 16px 0;
+        }
+
+        .footer-links {
+            text-align: center;
+            font-size: 11px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(139, 115, 85, 0.15);
+            padding-top: 16px;
+        }
+
+        .footer-links a {
+            color: var(--accent-brown);
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <div class="container">
+            
+            <header class="header-dark">
+                <div class="logo">
+                    <span style="color:#F5F0E8;">телегра</span><span style="color:#B8943E;">ФЪ</span>
+                </div>
+                <div class="meta-text">ОТПИСКА</div>
+            </header>
+
+            <div class="header-light">
+                <h1>Управление подпиской</h1>
+            </div>
+
+            <main class="content">
+                <p>Вы действительно хотите отписаться от дайджеста рассылки?<br>Вы больше не будете получать новые публикации с этого канала.</p>
+                
+                <form method="POST" action="">
+                    <button type="submit" class="btn-primary">Подтвердить отписку</button>
+                </form>
+            </main>
+
+            <div class="footer-divider"><div class="footer-divider-inner"></div></div>
+
+            <footer class="footer-dark">
+                <div style="display: flex; align-items: center;">
+                    <span style="font-family:Georgia,serif; font-size:18px; font-weight:bold; color:#B8943E; margin-right: 10px;">ФЪ</span>
+                    <span class="meta-text">СИСТЕМНОЕ СООБЩЕНИЕ</span>
+                </div>
+                <p class="footer-text">Если вы перешли по этой ссылке случайно, просто закройте страницу.</p>
+            </footer>
+
+        </div>
+    </div>
+</body>
+</html>

@@ -167,6 +167,7 @@ class AdminPanelService(IAdminPanelService):
         email: str,
         newsletter_id: UUID,
         user_id: UUID,
+        subscription_id: UUID,
         channel: ChannelDTO,
         messages: list[ChannelMessageDTO],
     ) -> None:
@@ -181,14 +182,13 @@ class AdminPanelService(IAdminPanelService):
                     user_id,
                 )
                 html_content = self.email_sender.generate_html_content(
-                    channel,
-                    messages,
-                    letter.id,
+                    channel, messages, letter.id, subscription_id
                 )
                 await self.email_sender(
                     to_emails=[email],
                     subject=channel.name,
                     html_content=html_content,
+                    subscription_id=subscription_id,
                 )
                 await dao_factory.commit()
 
@@ -231,23 +231,26 @@ class AdminPanelService(IAdminPanelService):
                     message_id=message.id,
                 )
             request_logger.info("sending_letters")
-            subscribers = (
+            subscriptions = (
                 await self.subscription_dao.find_by_channel_id_with_loaded_user(
                     channel_id
                 )
             )
-            span.set_attribute("subscribers.count", len(subscribers))
+            span.set_attribute("subscribers.count", len(subscriptions))
             await self.newsletter_dao.commit()
 
             semaphore = asyncio.Semaphore(10)
 
-            async def safe_send_letter(subscriber_email: str, subscriber_id: UUID):
+            async def safe_send_letter(
+                subscriber_email: str, subscriber_id: UUID, subscription_id: UUID
+            ):
                 async with semaphore:
                     try:
                         await self.send_letter(
                             subscriber_email,
                             newsletter.id,
                             subscriber_id,
+                            subscription_id,
                             channel,
                             messages.root,
                         )
@@ -261,10 +264,11 @@ class AdminPanelService(IAdminPanelService):
 
             tasks = [
                 safe_send_letter(
-                    subscriber.user.email,
-                    subscriber.user.id,
+                    subscription.user.email,
+                    subscription.user.id,
+                    subscription.id,
                 )
-                for subscriber in subscribers
+                for subscription in subscriptions
             ]
             if len(tasks) != 0:
                 await asyncio.gather(*tasks)

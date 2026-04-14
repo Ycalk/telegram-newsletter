@@ -15,6 +15,7 @@ class EmailSenderSettings(BaseSettings):
 
     send_from_email: str
     track_url: str
+    unsubscribe_url: str
     resend_api_key: str | None = None
     sendgrid_api_key: str | None = None
 

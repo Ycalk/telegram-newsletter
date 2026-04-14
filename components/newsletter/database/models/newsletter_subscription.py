@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 from uuid import UUID, uuid4
 
-from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint, func, select
+from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint, delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload
 
@@ -41,6 +41,15 @@ class NewsletterSubscriptionDAO(BaseDAO[NewsletterSubscription, UUID]):
         )
         await self.save(obj)
         return obj
+
+    async def delete(
+        self,
+        subscription_id: UUID,
+    ) -> None:
+        stmt = delete(NewsletterSubscription).where(
+            NewsletterSubscription.id == subscription_id,
+        )
+        await self._session.execute(stmt)
 
     async def find_by_user_id_with_loaded_user(
         self, user_id: UUID

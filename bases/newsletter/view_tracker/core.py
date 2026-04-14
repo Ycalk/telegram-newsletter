@@ -32,9 +32,7 @@ async def build_app() -> FastAPI:
         LoggingSettingsProvider(),
     )
 
-    app = FastAPI(
-        lifespan=lifespan,
-    )
+    app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
     setup_logging(await container.get(LoggingSettings), "view_tracker")
 

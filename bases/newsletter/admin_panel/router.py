@@ -99,7 +99,7 @@ async def preview_newsletter(
             created_at_end=int(now.timestamp()),
         )
     )
-    email_html = email_sender.generate_html_content(channel, messages.root, None)
+    email_html = email_sender.generate_html_content(channel, messages.root, None, None)
     return templates.TemplateResponse(
         request=request,
         name="partials/preview_wrapper.html",

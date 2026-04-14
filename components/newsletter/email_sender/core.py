@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 from newsletter.api_client import IAPIClient
 from newsletter.dto import Channel, ChannelMessage
 from sendgrid import SendGridAPIClient
-from sendgrid.helpers.mail import Mail
+from sendgrid.helpers.mail import Header, Mail
 
 from .settings import EmailSenderSettings
 
@@ -21,11 +21,19 @@ _EmailSenderEnv = NewType("_EmailSenderEnv", Environment)
 
 class IEmailSender(Protocol):
     async def __call__(
-        self, to_emails: list[str], subject: str, html_content: str
+        self,
+        to_emails: list[str],
+        subject: str,
+        html_content: str,
+        subscription_id: UUID | None,
     ) -> None: ...
 
     def generate_html_content(
-        self, channel: Channel, messages: list[ChannelMessage], letter_id: UUID | None
+        self,
+        channel: Channel,
+        messages: list[ChannelMessage],
+        letter_id: UUID | None,
+        subscription_id: UUID | None,
     ) -> str: ...
 
 
@@ -36,18 +44,27 @@ class EmailSender(IEmailSender):
         env: _EmailSenderEnv,
         api_client: IAPIClient,
         track_url: str,
+        unsubscribe_url: str,
         sendgrid_client: SendGridAPIClient | None,
     ) -> None:
         self.send_from_email: str = send_from_email
         self.env: Environment = env
         self.api_client: IAPIClient = api_client
         self.track_url: str = track_url
+        self.unsubscribe_url: str = unsubscribe_url
         self.sendgrid_client: SendGridAPIClient | None = sendgrid_client
 
     @override
     async def __call__(
-        self, to_emails: list[str], subject: str, html_content: str
+        self,
+        to_emails: list[str],
+        subject: str,
+        html_content: str,
+        subscription_id: UUID | None,
     ) -> None:
+        unsubscribe_url: str | None = (
+            f"{self.unsubscribe_url}/{subscription_id}" if subscription_id else None
+        )
         if self.sendgrid_client is None:
             message: resend.Emails.SendParams = {
                 "from": self.send_from_email,
@@ -55,6 +72,11 @@ class EmailSender(IEmailSender):
                 "subject": subject,
                 "html": html_content,
             }
+            if unsubscribe_url is not None:
+                message["headers"] = {
+                    "List-Unsubscribe": f"<{unsubscribe_url}>",
+                    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+                }
             await asyncio.to_thread(resend.Emails.send, message)
         else:
             mail = Mail(
@@ -63,6 +85,11 @@ class EmailSender(IEmailSender):
                 subject=subject,
                 html_content=html_content,
             )
+            if unsubscribe_url is not None:
+                mail.add_header(Header("List-Unsubscribe", f"<{unsubscribe_url}>"))
+                mail.add_header(
+                    Header("List-Unsubscribe-Post", "List-Unsubscribe=One-Click")
+                )
             await asyncio.to_thread(self.sendgrid_client.send, mail)
 
     def _format_ru_date(self, dt: datetime) -> str:
@@ -87,7 +114,11 @@ class EmailSender(IEmailSender):
 
     @override
     def generate_html_content(
-        self, channel: Channel, messages: list[ChannelMessage], letter_id: UUID | None
+        self,
+        channel: Channel,
+        messages: list[ChannelMessage],
+        letter_id: UUID | None,
+        subscription_id: UUID | None,
     ) -> str:
         template = self.env.get_template("newsletter-new-color.html")
         return template.render(
@@ -96,6 +127,9 @@ class EmailSender(IEmailSender):
             if channel.logo
             else None,
             tracking_url=f"{self.track_url}/{letter_id}" if letter_id else None,
+            unsubscribe_url=f"{self.unsubscribe_url}/{subscription_id}"
+            if subscription_id
+            else None,
             messages=[
                 {
                     "text": re.sub(
@@ -153,5 +187,6 @@ class EmailSenderProvider(Provider):
             env,
             api_client,
             settings.track_url,
+            settings.unsubscribe_url,
             sendgrid_client,
         )

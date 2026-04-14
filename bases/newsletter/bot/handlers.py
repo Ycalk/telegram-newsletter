@@ -251,6 +251,7 @@ async def process_email(
             to_emails=[email],
             subject="Код подтверждения — Telegram рассылка",
             html_content=confirmation_template.render(code=code),
+            subscription_id=None,
         )
         request_logger.info("confirmation_email_sent")
 

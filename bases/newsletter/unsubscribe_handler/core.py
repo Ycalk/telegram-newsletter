@@ -1,30 +1,34 @@
 import asyncio
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from dishka import Provider, Scope, make_async_container, provide
-from dishka.dependency_source import CompositeDependencySource
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
+from fastapi.templating import Jinja2Templates
 from newsletter.api_client import APIClientProvider
+from newsletter.database import DatabaseProvider
 from newsletter.logging import LoggingSettings, LoggingSettingsProvider, setup_logging
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from uvicorn import Config, Server
 
 from .router import router
-from .settings import MediaProxySettings
-from .utils import MediaProxyUtils
+from .settings import UnsubscribeHandlerSettings
 
 
-class MediaProxyProvider(Provider):
+class UnsubscribeHandlerProvider(Provider):
     @provide(scope=Scope.APP)
-    def settings(self) -> MediaProxySettings:
-        return MediaProxySettings()  # type: ignore # pyright: ignore
+    def settings(self) -> UnsubscribeHandlerSettings:
+        return UnsubscribeHandlerSettings()  # type: ignore # pyright: ignore
 
-    media_proxy_utils: CompositeDependencySource = provide(
-        MediaProxyUtils,
-        provides=MediaProxyUtils,
-        scope=Scope.REQUEST,
-    )
+    @provide(scope=Scope.APP)
+    def templates(self) -> Jinja2Templates:
+        current_dir = Path(__file__).resolve().parent
+        templates_dir = current_dir / "templates"
+        if not templates_dir.exists():
+            raise RuntimeError(f"Templates directory not found: {templates_dir}")
+
+        return Jinja2Templates(templates_dir)
 
 
 @asynccontextmanager
@@ -35,14 +39,15 @@ async def lifespan(app: FastAPI):
 
 async def build_app() -> FastAPI:
     container = make_async_container(
-        MediaProxyProvider(),
-        APIClientProvider(),
+        UnsubscribeHandlerProvider(),
+        DatabaseProvider(),
         LoggingSettingsProvider(),
+        APIClientProvider(),
     )
 
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
 
-    setup_logging(await container.get(LoggingSettings), "media_proxy")
+    setup_logging(await container.get(LoggingSettings), "unsubscribe_handler")
 
     FastAPIInstrumentor.instrument_app(app)
     setup_dishka(container=container, app=app)
@@ -53,8 +58,8 @@ async def build_app() -> FastAPI:
 
 async def run_app() -> None:
     app = await build_app()
-    settings: MediaProxySettings = await app.state.dishka_container.get(
-        MediaProxySettings
+    settings: UnsubscribeHandlerSettings = await app.state.dishka_container.get(
+        UnsubscribeHandlerSettings
     )
 
     config = Config(
