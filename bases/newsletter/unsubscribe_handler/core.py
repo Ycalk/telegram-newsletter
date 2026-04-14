@@ -6,7 +6,6 @@ from dishka import Provider, Scope, make_async_container, provide
 from dishka.integrations.fastapi import setup_dishka
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
-from newsletter.api_client import APIClientProvider
 from newsletter.database import DatabaseProvider
 from newsletter.logging import LoggingSettings, LoggingSettingsProvider, setup_logging
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
@@ -42,7 +41,6 @@ async def build_app() -> FastAPI:
         UnsubscribeHandlerProvider(),
         DatabaseProvider(),
         LoggingSettingsProvider(),
-        APIClientProvider(),
     )
 
     app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)

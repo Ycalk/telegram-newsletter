@@ -15,6 +15,7 @@ packages = [
     {include = "newsletter/dto",from = "components"},
     {include = "newsletter/media_proxy",from = "bases"},
     {include = "newsletter/view_tracker",from = "bases"},
+    {include = "newsletter/unsubscribe_handler",from = "bases"},
 ]
 
 [tool.poetry.dependencies]

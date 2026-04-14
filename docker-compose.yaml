@@ -120,6 +120,7 @@ services:
       #- RESEND_API_KEY=${RESEND_API_KEY}
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
       - TRACK_URL=${TRACK_URL}
+      - UNSUBSCRIBE_URL=${UNSUBSCRIBE_URL}
       
       - API_BASE_URL=${API_BASE_URL}
       - S3_BASE_URL=${INTERNAL_S3_BASE_URL}
@@ -153,6 +154,7 @@ services:
       #- RESEND_API_KEY=${RESEND_API_KEY}
       - SENDGRID_API_KEY=${SENDGRID_API_KEY}
       - TRACK_URL=${TRACK_URL}
+      - UNSUBSCRIBE_URL=${UNSUBSCRIBE_URL}
       
       - API_BASE_URL=${API_BASE_URL}
       - S3_BASE_URL=${INTERNAL_S3_BASE_URL}
@@ -189,6 +191,26 @@ services:
     restart: always
     ports:
       - "127.0.0.1:4700:8000"
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+
+      - TRACE_EXPORTER_ENDPOINT=http://jaeger:4318/v1/traces
+    depends_on:
+      <<: *additional_services_healthy
+      migrator:
+        condition: service_started
+  
+  unsubscribe_handler:
+    build:
+      context: projects/unsubscribe_handler
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "127.0.0.1:4600:8000"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}

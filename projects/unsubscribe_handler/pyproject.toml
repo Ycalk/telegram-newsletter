@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "unsubscribe_handler"
+version = "0.1.0"
+
+authors = ["ycalk <alosev752@gmail.com>"]
+license = ""
+
+packages = [
+    {include = "newsletter/unsubscribe_handler",from = "../../bases"},
+    {include = "newsletter/database",from = "../../components"},
+    {include = "newsletter/dto",from = "../../components"},
+    {include = "newsletter/logging",from = "../../components"},
+]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+pydantic-settings = "^2.13.1"
+fastapi = {extras = ["standard"], version = "^0.135.1"}
+dishka = {extras = ["fastapi"], version = "^1.9.1"}
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.45"}
+asyncpg = "^0.31.0"
+structlog = "^25.5.0"
+opentelemetry-api = "^1.40.0"
+opentelemetry-sdk = "^1.40.0"
+opentelemetry-exporter-otlp = "^1.40.0"
+opentelemetry-instrumentation-fastapi = "^0.61b0"
+opentelemetry-instrumentation-sqlalchemy = "^0.61b0"
+resend = "^2.26.0"
+sendgrid = "^6.12.5"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+run_project = "newsletter.unsubscribe_handler:run"

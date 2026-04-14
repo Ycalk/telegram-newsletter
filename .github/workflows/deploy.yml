@@ -65,6 +65,13 @@ jobs:
           poetry build-project
           poetry export -f requirements.txt --output requirements.txt --without-hashes
 
+      - name: Create unsubscribe handler project wheel
+        working-directory: projects/unsubscribe_handler
+        run: |
+          poetry install
+          poetry build-project
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+
       - name: Archive code for deploy
         run: |
           zip -r deploy.zip docker-compose.yaml projects/ jaeger/
@@ -83,6 +90,7 @@ jobs:
           echo "INTERNAL_S3_BASE_URL=${{ vars.INTERNAL_S3_BASE_URL}}" >> .env
           echo "API_SECRET_TOKEN=${{ secrets.API_SECRET_TOKEN}}" >> .env
           echo "TRACK_URL=${{ vars.TRACK_URL}}" >> .env
+          echo "UNSUBSCRIBE_URL=${{ vars.UNSUBSCRIBE_URL}}" >> .env
 
           echo "BOT_TOKEN=${{ secrets.BOT_TOKEN }}" >> .env
           echo "BOT_USERNAME=${{ vars.BOT_USERNAME }}" >> .env
