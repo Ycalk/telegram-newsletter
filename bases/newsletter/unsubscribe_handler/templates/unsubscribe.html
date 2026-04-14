@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
-    <title>Отписка успешна | телеграФЪ</title>
+    <title>Отписка от рассылки | телеграФЪ</title>
     <style>
         :root {
             --bg-outer: #EDE7DB;
@@ -19,6 +19,7 @@
             --accent-gold: #B8943E;
             --accent-brown: #8B7355;
             --border-light: #D9D0C3;
+            --btn-hover: #302b26;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -29,6 +30,7 @@
                 --text-primary: #F5F0E8;
                 --text-secondary: #D9D0C3;
                 --border-light: #3A3632;
+                --btn-hover: #2a2522;
             }
         }
 
@@ -100,17 +102,39 @@
             text-align: center;
         }
 
-        .success-icon {
-            font-size: 48px;
-            color: var(--accent-gold);
-            margin-bottom: 16px;
-        }
-
         p {
             font-size: 16px;
             line-height: 1.7;
             color: var(--text-secondary);
             margin: 0 0 24px 0;
+        }
+
+        .btn-primary {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px 32px;
+            border: 1px solid var(--accent-gold);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .cancel-link {
+            display: block;
+            margin-top: 16px;
+            color: var(--accent-brown);
+            font-size: 14px;
+            text-decoration: underline;
         }
 
         .footer-divider {
@@ -135,6 +159,19 @@
             color: var(--text-muted);
             margin: 16px 0;
         }
+
+        .footer-links {
+            text-align: center;
+            font-size: 11px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(139, 115, 85, 0.15);
+            padding-top: 16px;
+        }
+
+        .footer-links a {
+            color: var(--accent-brown);
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -146,16 +183,20 @@
                 <div class="logo">
                     <span style="color:#F5F0E8;">телегра</span><span style="color:#B8943E;">ФЪ</span>
                 </div>
-                <div class="meta-text">СТАТУС</div>
+                <div class="meta-text">ОТПИСКА</div>
             </header>
 
             <div class="header-light">
-                <h1>Вы успешно отписаны</h1>
+                <h1>Управление подпиской</h1>
             </div>
 
             <main class="content">
-                <div class="success-icon">✓</div>
-                <p>Ваш адрес удален из списка рассылки для этого канала.</p>
+                <p>Вы действительно хотите отписаться от дайджеста рассылки?<br>Вы больше не будете получать новые
+                    публикации с этого канала.</p>
+
+                <form method="POST" action="">
+                    <button type="submit" class="btn-primary">Подтвердить отписку</button>
+                </form>
             </main>
 
             <div class="footer-divider">
@@ -168,8 +209,7 @@
                         style="font-family:Georgia,serif; font-size:18px; font-weight:bold; color:#B8943E; margin-right: 10px;">ФЪ</span>
                     <span class="meta-text">СИСТЕМНОЕ СООБЩЕНИЕ</span>
                 </div>
-                <p class="footer-text">Изменения вступили в силу. Эту страницу можно безопасно закрыть. Если это
-                    произошло по ошибке, вы всегда можете подписаться заново через нашего Telegram-бота.</p>
+                <p class="footer-text">Если вы перешли по этой ссылке случайно, просто закройте страницу.</p>
             </footer>
 
         </div>
