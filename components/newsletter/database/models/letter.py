@@ -93,6 +93,18 @@ class LetterDAO(BaseDAO[Letter, UUID]):
         # дата, всего отправлено, сколько прочитано
         return list(result.tuples().all())
 
+    async def find_newest_letter_by_subscription_id(
+        self, newsletter_subscription_id: UUID
+    ) -> Letter | None:
+        stmt = (
+            select(Letter)
+            .where(Letter.newsletter_subscription_id == newsletter_subscription_id)
+            .order_by(Letter.created_at.desc())
+            .limit(1)
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
 
 class LetterDAOFactory(BaseDAOFactory[LetterDAO]):
     def __init__(self, session_maker: async_sessionmaker[AsyncSession]) -> None:

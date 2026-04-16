@@ -102,6 +102,30 @@ class NewsletterSubscriptionDAO(BaseDAO[NewsletterSubscription, UUID]):
         result = await self._session.execute(stmt)
         return list(result.scalars().all())
 
+    async def find_by_id_with_loaded_user(
+        self, id: UUID, skip_unsubscribe: bool = True
+    ) -> NewsletterSubscription | None:
+        stmt = select(NewsletterSubscription).where(NewsletterSubscription.id == id)
+        if skip_unsubscribe:
+            stmt = stmt.where(NewsletterSubscription.unsubscribed_at.is_(None))
+
+        stmt = stmt.options(
+            joinedload(NewsletterSubscription.user).joinedload(User.telegram_user),
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def list_by_send_at(
+        self, send_at: int, skip_unsubscribe: bool = True
+    ) -> list[NewsletterSubscription]:
+        stmt = select(NewsletterSubscription).where(
+            NewsletterSubscription.send_at == send_at
+        )
+        if skip_unsubscribe:
+            stmt = stmt.where(NewsletterSubscription.unsubscribed_at.is_(None))
+        result = await self._session.execute(stmt)
+        return list(result.scalars().all())
+
 
 class NewsletterSubscriptionDAOFactory(BaseDAOFactory[NewsletterSubscriptionDAO]):
     def __init__(self, session_maker: async_sessionmaker[AsyncSession]) -> None:

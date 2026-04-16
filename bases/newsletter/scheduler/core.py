@@ -5,6 +5,7 @@ from dishka import Provider, Scope, make_async_container, provide_all
 from dishka.dependency_source import CompositeDependencySource
 from newsletter.api_client import APIClientProvider
 from newsletter.database import DatabaseProvider
+from newsletter.email_sender import EmailSenderProvider
 from newsletter.logging import LoggingSettings, LoggingSettingsProvider, setup_logging
 
 from .tasks import TASK_CLASSES, BaseTask
@@ -19,6 +20,7 @@ async def main() -> None:
         SchedulerProvider(),
         DatabaseProvider(),
         APIClientProvider(),
+        EmailSenderProvider(),
         LoggingSettingsProvider(),
     )
     setup_logging(await container.get(LoggingSettings), "scheduler")
