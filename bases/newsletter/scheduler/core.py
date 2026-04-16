@@ -35,9 +35,11 @@ async def main() -> None:
             for task_class, latest_run in task_latest_run.items():
                 if datetime.now(timezone.utc) - latest_run >= task_class.interval:
 
-                    async def execute_task() -> None:
+                    async def execute_task(
+                        _task_class: type[BaseTask] = task_class,
+                    ) -> None:
                         async with container() as request_container:
-                            task_instance = await request_container.get(task_class)
+                            task_instance = await request_container.get(_task_class)
                             await task_instance()
 
                     task = asyncio.create_task(execute_task())
