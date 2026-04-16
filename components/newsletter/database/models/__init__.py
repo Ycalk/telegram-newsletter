@@ -1,14 +1,13 @@
 from ._base import MultipleDAOFactory
-from .letter import Letter, LetterDAO, LetterDAOFactory
-from .newsletter import (
-    Newsletter,
-    NewsletterDAO,
-    NewsletterDAOFactory,
-    NewsletterElement,
-    NewsletterElementDAO,
-    NewsletterElementDAOFactory,
-    NewsletterStatsDTO,
+from .channel import Channel, ChannelDAO, ChannelDAOFactory
+from .channel_message import (
+    ChannelMessage,
+    ChannelMessageDAO,
+    ChannelMessageDAOFactory,
+    MessageMediaLink,
 )
+from .letter import Letter, LetterDAO, LetterDAOFactory, LetterElement
+from .media import Media, MediaDAO, MediaDAOFactory
 from .newsletter_subscription import (
     NewsletterSubscription,
     NewsletterSubscriptionDAO,
@@ -25,23 +24,27 @@ from .user import (
 
 __all__ = [
     "MultipleDAOFactory",
+    "Channel",
+    "ChannelDAO",
+    "ChannelDAOFactory",
+    "ChannelMessage",
+    "ChannelMessageDAO",
+    "ChannelMessageDAOFactory",
+    "MessageMediaLink",
     "Letter",
     "LetterDAO",
     "LetterDAOFactory",
-    "Newsletter",
-    "NewsletterDAO",
-    "NewsletterDAOFactory",
-    "NewsletterElement",
-    "NewsletterElementDAO",
-    "NewsletterElementDAOFactory",
-    "NewsletterStatsDTO",
-    "User",
-    "UserDAO",
-    "UserDAOFactory",
-    "TelegramUser",
-    "TelegramUserDAO",
-    "TelegramUserDAOFactory",
+    "LetterElement",
+    "Media",
+    "MediaDAO",
+    "MediaDAOFactory",
     "NewsletterSubscription",
     "NewsletterSubscriptionDAO",
     "NewsletterSubscriptionDAOFactory",
+    "TelegramUser",
+    "TelegramUserDAO",
+    "TelegramUserDAOFactory",
+    "User",
+    "UserDAO",
+    "UserDAOFactory",
 ]

@@ -2,7 +2,7 @@ from abc import ABC
 from collections.abc import AsyncIterator, Callable, Sequence
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, TypeVar
+from typing import Any
 
 from sqlalchemy import TIMESTAMP, func, select
 from sqlalchemy.ext.asyncio import AsyncAttrs, AsyncSession, async_sessionmaker
@@ -67,14 +67,13 @@ class BaseDAOFactory[DAO: BaseDAO[Any, Any]]:
         return super().__new__(cls)
 
 
-T_DAO = TypeVar("T_DAO", bound=BaseDAO[Any, Any])
-
-
 class _DAOFactory:
     def __init__(self, session: AsyncSession) -> None:
         self._session: AsyncSession = session
 
-    def __call__(self, dao_cls: Callable[[AsyncSession], T_DAO]) -> T_DAO:
+    def __call__[T_DAO: BaseDAO[Any, Any]](
+        self, dao_cls: Callable[[AsyncSession], T_DAO]
+    ) -> T_DAO:
         return dao_cls(self._session)
 
     async def commit(self) -> None:

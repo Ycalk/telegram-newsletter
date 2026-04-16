@@ -14,13 +14,15 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from .models import (
+    ChannelDAO,
+    ChannelDAOFactory,
+    ChannelMessageDAO,
+    ChannelMessageDAOFactory,
     LetterDAO,
     LetterDAOFactory,
+    MediaDAO,
+    MediaDAOFactory,
     MultipleDAOFactory,
-    NewsletterDAO,
-    NewsletterDAOFactory,
-    NewsletterElementDAO,
-    NewsletterElementDAOFactory,
     NewsletterSubscriptionDAO,
     NewsletterSubscriptionDAOFactory,
     TelegramUserDAO,
@@ -35,21 +37,27 @@ DatabaseUrl = NewType("DatabaseUrl", str)
 
 def register_model() -> list[type]:
     from .models import (
+        Channel,
+        ChannelMessage,
         Letter,
-        Newsletter,
-        NewsletterElement,
+        LetterElement,
+        Media,
+        MessageMediaLink,
         NewsletterSubscription,
         TelegramUser,
         User,
     )
 
     return [
+        Channel,
+        ChannelMessage,
         Letter,
-        Newsletter,
-        NewsletterElement,
+        LetterElement,
+        Media,
+        MessageMediaLink,
+        NewsletterSubscription,
         TelegramUser,
         User,
-        NewsletterSubscription,
     ]
 
 
@@ -123,9 +131,10 @@ class DatabaseProvider(Provider):
             yield session
 
     data_access_objects: CompositeDependencySource = provide_all(
+        ChannelDAO,
+        ChannelMessageDAO,
         LetterDAO,
-        NewsletterDAO,
-        NewsletterElementDAO,
+        MediaDAO,
         TelegramUserDAO,
         UserDAO,
         NewsletterSubscriptionDAO,
@@ -133,9 +142,10 @@ class DatabaseProvider(Provider):
     )
 
     data_access_object_factories: CompositeDependencySource = provide_all(
+        ChannelDAOFactory,
+        ChannelMessageDAOFactory,
         LetterDAOFactory,
-        NewsletterDAOFactory,
-        NewsletterElementDAOFactory,
+        MediaDAOFactory,
         TelegramUserDAOFactory,
         UserDAOFactory,
         NewsletterSubscriptionDAOFactory,

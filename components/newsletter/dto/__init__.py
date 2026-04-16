@@ -1,8 +1,6 @@
 from .core import (
     Channel,
     ChannelMessage,
-    ChannelMessageStatistic,
-    ChannelStatistic,
     Media,
     MediaWithURL,
     ParsingTask,
@@ -12,8 +10,6 @@ from .core import (
 __all__ = [
     "Channel",
     "ChannelMessage",
-    "ChannelMessageStatistic",
-    "ChannelStatistic",
     "Media",
     "MediaWithURL",
     "ParsingTask",

@@ -10,7 +10,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, selectinload
 from ._base import BaseDAO, BaseDAOFactory, BaseModel
 
 if TYPE_CHECKING:
-    from .letter import Letter
     from .newsletter_subscription import NewsletterSubscription
 
 
@@ -21,13 +20,10 @@ class User(BaseModel):
     email: Mapped[str] = mapped_column(String(500), unique=True, index=True)
 
     telegram_user: Mapped[TelegramUser | None] = relationship(
-        back_populates="user", passive_deletes=True
-    )
-    letters: Mapped[list[Letter]] = relationship(
-        back_populates="user", passive_deletes=True
+        back_populates="user", cascade="all, delete-orphan", passive_deletes=True
     )
     subscriptions: Mapped[list[NewsletterSubscription]] = relationship(
-        back_populates="user", passive_deletes=True
+        back_populates="user", cascade="all, delete-orphan", passive_deletes=True
     )
 
 
