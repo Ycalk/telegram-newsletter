@@ -15,6 +15,7 @@ from aiogram.types import (
 from dishka import FromDishka
 from email_validator import EmailNotValidError, validate_email
 from jinja2 import Environment
+from newsletter.bot.handlers.subscribe import SubscriptionStates
 from newsletter.bot.settings import BotSettings
 from newsletter.database import (
     ChannelDAO,
@@ -73,6 +74,41 @@ def _build_channels_keyboard(
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
+def _build_channels_keyboard_for_unregistered(
+    channels: list[tuple[int, str]],
+    page: int,
+    total_pages: int,
+) -> InlineKeyboardMarkup:
+    """Build inline keyboard for unregistered users — leads into subscribe flow."""
+    start = page * CHANNELS_PER_PAGE
+    end = start + CHANNELS_PER_PAGE
+    page_channels = channels[start:end]
+
+    buttons: list[list[InlineKeyboardButton]] = [
+        [
+            InlineKeyboardButton(
+                text=name,
+                callback_data=f"mgr_unreg_sub:{channel_id}",
+            )
+        ]
+        for channel_id, name in page_channels
+    ]
+
+    nav_row: list[InlineKeyboardButton] = []
+    if page > 0:
+        nav_row.append(
+            InlineKeyboardButton(text="⬅️", callback_data=f"mgr_unreg_page:{page - 1}")
+        )
+    if page < total_pages - 1:
+        nav_row.append(
+            InlineKeyboardButton(text="➡️", callback_data=f"mgr_unreg_page:{page + 1}")
+        )
+    if nav_row:
+        buttons.append(nav_row)
+
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
+
+
 @router.message(F.text == "⚙️ Управление подписками")
 async def manage_subscriptions(
     message: Message,
@@ -80,6 +116,7 @@ async def manage_subscriptions(
     jinja2_env: FromDishka[Environment],
     telegram_user_dao: FromDishka[TelegramUserDAO],
     newsletter_subscription_dao: FromDishka[NewsletterSubscriptionDAO],
+    channel_dao: FromDishka[ChannelDAO],
 ):
     if message.from_user is None:
         return
@@ -92,8 +129,18 @@ async def manage_subscriptions(
             message.from_user.id
         )
         if telegram_user is None:
+            all_channels = await channel_dao.list_with_loaded_subscriptions_and_logo()
+            available = [(ch.id, ch.name) for ch in all_channels]
+            if not available:
+                await message.answer("Пока нет доступных каналов для подписки.")
+                return
+            await state.update_data(available_channels=available)
+            total_pages = (len(available) + CHANNELS_PER_PAGE - 1) // CHANNELS_PER_PAGE
+            keyboard = _build_channels_keyboard_for_unregistered(
+                available, page=0, total_pages=total_pages
+            )
             template = jinja2_env.get_template("manage_not_registered.html")
-            await message.answer(template.render())
+            await message.answer(template.render(), reply_markup=keyboard)
             return
         subscriptions = (
             await newsletter_subscription_dao.find_by_user_id_with_loaded_user(
@@ -263,6 +310,50 @@ async def paginate_channels(
     keyboard = _build_channels_keyboard(available, page=page, total_pages=total_pages)
     if isinstance(callback.message, Message):
         await callback.message.edit_reply_markup(reply_markup=keyboard)
+
+
+@router.callback_query(F.data.startswith("mgr_unreg_page:"))
+async def paginate_channels_for_unregistered(
+    callback: CallbackQuery,
+    state: FSMContext,
+):
+    if callback.message is None or callback.data is None:
+        return
+    await callback.answer()
+
+    page = int(callback.data.split(":", 1)[1])
+    data = await state.get_data()
+    available: list[tuple[int, str]] = data.get("available_channels", [])
+
+    if not available:
+        return
+
+    total_pages = (len(available) + CHANNELS_PER_PAGE - 1) // CHANNELS_PER_PAGE
+    keyboard = _build_channels_keyboard_for_unregistered(
+        available, page=page, total_pages=total_pages
+    )
+    if isinstance(callback.message, Message):
+        await callback.message.edit_reply_markup(reply_markup=keyboard)
+
+
+@router.callback_query(F.data.startswith("mgr_unreg_sub:"))
+async def select_channel_unregistered(
+    callback: CallbackQuery,
+    state: FSMContext,
+    jinja2_env: FromDishka[Environment],
+):
+    if callback.message is None or callback.data is None:
+        return
+    await callback.answer()
+
+    channel_id = int(callback.data.split(":", 1)[1])
+    await state.update_data(channel_id=channel_id)
+
+    await state.set_state(SubscriptionStates.waiting_for_email)
+
+    ask_email_template = jinja2_env.get_template("ask_email.html")
+    if isinstance(callback.message, Message):
+        await callback.message.edit_text(ask_email_template.render())
 
 
 @router.callback_query(F.data.startswith("mgr_sub:"))
