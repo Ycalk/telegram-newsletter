@@ -16,6 +16,7 @@ packages = [
     {include = "newsletter/media_proxy",from = "bases"},
     {include = "newsletter/view_tracker",from = "bases"},
     {include = "newsletter/unsubscribe_handler",from = "bases"},
+    {include = "newsletter/scheduler",from = "bases"},
 ]
 
 [tool.poetry.dependencies]

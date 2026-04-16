@@ -71,6 +71,13 @@ jobs:
           poetry install
           poetry build-project
           poetry export -f requirements.txt --output requirements.txt --without-hashes
+      
+      - name: Create scheduler project wheel
+        working-directory: projects/scheduler
+        run: |
+          poetry install
+          poetry build-project
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
 
       - name: Archive code for deploy
         run: |

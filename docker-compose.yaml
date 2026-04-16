@@ -223,6 +223,34 @@ services:
       <<: *additional_services_healthy
       migrator:
         condition: service_started
+  
+  scheduler:
+    build:
+      context: projects/scheduler
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+
+      - SEND_FROM_EMAIL=${SEND_FROM_EMAIL}
+      #- RESEND_API_KEY=${RESEND_API_KEY}
+      - SENDGRID_API_KEY=${SENDGRID_API_KEY}
+      - TRACK_URL=${TRACK_URL}
+      - UNSUBSCRIBE_URL=${UNSUBSCRIBE_URL}
+      
+      - API_BASE_URL=${API_BASE_URL}
+      - S3_BASE_URL=${INTERNAL_S3_BASE_URL}
+      - API_SECRET_TOKEN=${API_SECRET_TOKEN}
+
+      - TRACE_EXPORTER_ENDPOINT=http://jaeger:4318/v1/traces
+    depends_on:
+      <<: *additional_services_healthy
+      migrator:
+        condition: service_started
 
 volumes:
   postgres-data:

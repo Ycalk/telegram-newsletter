@@ -1,0 +1,39 @@
+[tool.poetry]
+name = "scheduler"
+version = "0.1.0"
+
+authors = ["ycalk <alosev752@gmail.com>"]
+license = ""
+
+packages = [
+    {include = "newsletter/scheduler",from = "../../bases"},
+    {include = "newsletter/logging",from = "../../components"},
+    {include = "newsletter/dto",from = "../../components"},
+    {include = "newsletter/api_client",from = "../../components"},
+    {include = "newsletter/database",from = "../../components"},
+    {include = "newsletter/email_sender",from = "../../components"},
+]
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.14"
+pydantic-settings = "^2.13.1"
+dishka = "^1.9.1"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.45"}
+asyncpg = "^0.31.0"
+structlog = "^25.5.0"
+opentelemetry-api = "^1.40.0"
+opentelemetry-sdk = "^1.40.0"
+opentelemetry-exporter-otlp = "^1.40.0"
+opentelemetry-instrumentation-sqlalchemy = "^0.61b0"
+httpx = "^0.28.1"
+resend = "^2.26.0"
+hishel = {extras = ["httpx"], version = "^1.1.9"}
+sendgrid = "^6.12.5"
+jinja2 = "^3.1.6"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+run_project = "newsletter.scheduler:run"
