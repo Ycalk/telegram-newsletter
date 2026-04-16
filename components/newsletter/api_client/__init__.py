@@ -5,7 +5,6 @@ from .methods import (
     GetChannel,
     GetChannelIds,
     GetChannelMessages,
-    GetChannelStatistics,
     GetMedia,
     GetMessage,
 )
@@ -19,7 +18,6 @@ __all__ = [
     "GetChannel",
     "GetChannelIds",
     "GetChannelMessages",
-    "GetChannelStatistics",
     "GetMedia",
     "GetMessage",
 ]
