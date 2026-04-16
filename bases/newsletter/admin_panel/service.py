@@ -82,7 +82,13 @@ class AdminPanelService(IAdminPanelService):
                         logo_url=self.api_client.get_media_url(channel.logo.file_name)
                         if channel.logo
                         else None,
-                        subscriptions_count=len(channel.subscriptions),
+                        subscriptions_count=len(
+                            [
+                                sub
+                                for sub in channel.subscriptions
+                                if sub.unsubscribed_at is None
+                            ]
+                        ),
                     )
                     for channel in channels
                 ]
@@ -113,7 +119,13 @@ class AdminPanelService(IAdminPanelService):
                     id=channel.id,
                     name=channel.name,
                     logo_url=logo_url,
-                    subscriptions_count=len(channel.subscriptions),
+                    subscriptions_count=len(
+                        [
+                            sub
+                            for sub in channel.subscriptions
+                            if sub.unsubscribed_at is None
+                        ]
+                    ),
                 )
 
     @override
