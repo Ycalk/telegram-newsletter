@@ -32,6 +32,7 @@ class NewsletterSubscription(BaseModel):
     unsubscribed_at: Mapped[datetime | None] = mapped_column(
         TIMESTAMP(timezone=True), default=None
     )
+    send_at: Mapped[int] = mapped_column()
 
     user: Mapped[User] = relationship(back_populates="subscriptions")
     channel: Mapped[Channel] = relationship(back_populates="subscriptions")
@@ -50,10 +51,12 @@ class NewsletterSubscriptionDAO(BaseDAO[NewsletterSubscription, UUID]):
         self,
         user_id: UUID,
         channel_id: int,
+        send_at: int,
     ) -> NewsletterSubscription:
         obj = NewsletterSubscription(
             user_id=user_id,
             channel_id=channel_id,
+            send_at=send_at,
         )
         await self.save(obj)
         return obj
