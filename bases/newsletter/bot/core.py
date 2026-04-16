@@ -19,7 +19,7 @@ from newsletter.logging import LoggingSettings, LoggingSettingsProvider, setup_l
 from opentelemetry import trace
 from redis.asyncio import Redis
 
-from .handlers import router
+from .handlers import manage_router, start_router, subscribe_router
 from .settings import BotSettings
 
 
@@ -74,7 +74,9 @@ async def main():
     setup_dishka(container=container, router=dispatcher, auto_inject=True)
     dispatcher.shutdown.register(container.close)
     dispatcher.update.outer_middleware(TracingAndErrorMiddleware())
-    dispatcher.include_router(router)
+    dispatcher.include_router(start_router)
+    dispatcher.include_router(manage_router)
+    dispatcher.include_router(subscribe_router)
 
     bot = await container.get(Bot)
     await dispatcher.start_polling(bot)

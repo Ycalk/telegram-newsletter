@@ -1,0 +1,10 @@
+⚙️ <b>Управление подписками</b>
+
+📧 <b>Ваш email:</b> <code>{{ email|e }}</code>
+
+📢 <b>Активные подписки:</b>{% if subscriptions %}{% for sub in subscriptions %}
+• {{ sub.channel_name|e }} — рассылка в {{ sub.send_at }}:00{% endfor %}
+{% else %}
+<i>У вас пока нет активных подписок.</i>
+{% endif %}
+Выберите действие:
