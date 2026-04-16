@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from uuid import UUID
 
 from dishka.integrations.fastapi import DishkaRoute, FromDishka
@@ -41,7 +42,8 @@ async def unsubscribe_confirm(
 ):
     subscription = await newsletter_subscription_dao.find_by_id(subscription_id)
     if subscription is not None:
-        await newsletter_subscription_dao.delete(subscription_id)
+        subscription.unsubscribed_at = datetime.now(timezone.utc)
+        await newsletter_subscription_dao.save(subscription)
         await newsletter_subscription_dao.commit()
         return templates.TemplateResponse(
             request=request,

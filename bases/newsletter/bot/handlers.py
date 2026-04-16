@@ -1,4 +1,3 @@
-import asyncio
 import secrets
 from typing import Final
 
@@ -17,14 +16,14 @@ from aiogram.types import (
 from dishka import FromDishka
 from email_validator import validate_email
 from jinja2 import Environment
-from newsletter.api_client import GetChannel, IAPIClient
+from newsletter.api_client import IAPIClient
 from newsletter.channel_id_encryption import IChannelIdEncryption
 from newsletter.database import (
+    ChannelDAO,
     NewsletterSubscriptionDAO,
     TelegramUserDAO,
     UserDAO,
 )
-from newsletter.dto import Channel
 from newsletter.email_sender import IEmailSender
 from opentelemetry import trace
 
@@ -50,6 +49,7 @@ async def start_command(
     jinja2_env: FromDishka[Environment],
     telegram_user_dao: FromDishka[TelegramUserDAO],
     newsletter_subscription_dao: FromDishka[NewsletterSubscriptionDAO],
+    channel_dao: FromDishka[ChannelDAO],
 ):
     if message.from_user is None:
         return
@@ -87,21 +87,12 @@ async def start_command(
                     telegram_user.user_id
                 )
             )
-            channels = await asyncio.gather(
-                *[
-                    api_client(GetChannel(channel_id=sub.channel_id))
-                    for sub in subscriptions
-                ],
-                return_exceptions=True,
-            )
 
             await message.answer(
                 welcome_template.render(
                     user_email=telegram_user.user.email,
                     subscribed_channels=[
-                        channel.name
-                        for channel in channels
-                        if isinstance(channel, Channel)
+                        subscription.channel.name for subscription in subscriptions
                     ],
                 )
             )
@@ -121,14 +112,19 @@ async def start_command(
         request_logger = request_logger.bind(channel_id=channel_id)
         request_logger.info("channel_id_decrypted")
 
-        channel = await api_client(GetChannel(channel_id=channel_id))
-        request_logger = request_logger.bind(channel=channel)
+        channel = await channel_dao.find_by_id_with_loaded_logo(channel_id)
+        if channel is None:
+            request_logger.info("channel_not_found")
+            raise ValueError("Channel not found")
+
         request_logger.info("channel_found")
         span.set_attribute("channel_id", channel_id)
         span.set_attribute("channel_name", channel.name)
 
         channel_template = jinja2_env.get_template("channel.html")
-        text = channel_template.render(channel=channel)
+        text = channel_template.render(
+            channel_name=channel.name, channel_description=channel.description
+        )
         keyboard = InlineKeyboardMarkup(
             inline_keyboard=[
                 [
@@ -160,10 +156,10 @@ async def start_command(
 async def subscribe_callback(
     callback: CallbackQuery,
     state: FSMContext,
-    api_client: FromDishka[IAPIClient],
     jinja2_env: FromDishka[Environment],
     telegram_user_dao: FromDishka[TelegramUserDAO],
     newsletter_subscription_dao: FromDishka[NewsletterSubscriptionDAO],
+    channel_dao: FromDishka[ChannelDAO],
 ):
     if callback.message is None or callback.data is None:
         return
@@ -195,7 +191,11 @@ async def subscribe_callback(
             )
             await newsletter_subscription_dao.commit()
 
-            channel = await api_client(GetChannel(channel_id=channel_id))
+            channel = await channel_dao.find_by_id(channel_id)
+            if channel is None:
+                request_logger.info("channel_not_found")
+                raise ValueError("Channel not found")
+
             success_template = jinja2_env.get_template("subscription_success.html")
             await callback.message.answer(
                 success_template.render(
@@ -265,11 +265,11 @@ async def process_email(
 async def process_confirmation_code(
     message: Message,
     state: FSMContext,
-    api_client: FromDishka[IAPIClient],
     jinja2_env: FromDishka[Environment],
     user_dao: FromDishka[UserDAO],
     telegram_user_dao: FromDishka[TelegramUserDAO],
     newsletter_subscription_dao: FromDishka[NewsletterSubscriptionDAO],
+    channel_dao: FromDishka[ChannelDAO],
 ):
     if message.from_user is None or message.text is None:
         return
@@ -316,7 +316,11 @@ async def process_confirmation_code(
         request_logger.info("user_created_and_subscribed")
         await state.clear()
 
-        channel = await api_client(GetChannel(channel_id=channel_id))
+        channel = await channel_dao.find_by_id(channel_id)
+        if channel is None:
+            request_logger.info("channel_not_found")
+            raise ValueError("Channel not found")
+
         success_template = jinja2_env.get_template("registration_success.html")
         await message.answer(
             success_template.render(
